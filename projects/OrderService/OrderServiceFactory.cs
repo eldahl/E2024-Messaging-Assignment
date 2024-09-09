@@ -11,7 +11,9 @@ public static class OrderServiceFactory
   {
     var easyNetQFactory = new EasyNetQFactory();
     var newOrderClient = easyNetQFactory.CreateTopicMessageClient<OrderRequestMessage>("OrderService", "newOrder");
-    var orderCompletionClient = easyNetQFactory.CreatePubSubMessageClient<OrderResponseMessage>("");
+    var processOrderClient = easyNetQFactory.CreateTopicMessageClient<OrderRequestMessage>("OrderService", "processStockOrder");
+    var shippingCompletionClient = easyNetQFactory.CreateTopicMessageClient<OrderResponseMessage>("OrderService", "orderCompleted");
+    var orderCompletionClient = easyNetQFactory.CreateTopicMessageClient<OrderResponseMessage>("OrderService", "");
     
     var dataContext = new DataContext();
     var orderRepository = new OrderRepository(dataContext);
@@ -21,6 +23,8 @@ public static class OrderServiceFactory
     return new OrderService(
       newOrderClient,
       orderCompletionClient,
+      processOrderClient,
+      shippingCompletionClient,
       orderService,
       orderResponseMapper
     );

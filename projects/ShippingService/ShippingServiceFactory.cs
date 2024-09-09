@@ -5,11 +5,12 @@ namespace ShippingService;
 
 public static class ShippingServiceFactory
 {
-    public static ShippingService CreateShippingService(string queueName)
+    public static ShippingService CreateShippingService()
     {
         var easyNetQFactory = new EasyNetQFactory();
-        var messageClient = easyNetQFactory.CreatePubSubMessageClient<OrderResponseMessage>(queueName);
+        var messageClientResponse = easyNetQFactory.CreateTopicMessageClient<OrderResponseMessage>("ShippingService", "orderCompleted");
+        var messageClientStockRequest = easyNetQFactory.CreateTopicMessageClient<OrderRequestMessage>("ShippingService", "processShippingOrder");
         
-        return new ShippingService(messageClient);
+        return new ShippingService(messageClientResponse, messageClientStockRequest);
     }
 }

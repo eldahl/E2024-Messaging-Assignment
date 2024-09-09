@@ -1,6 +1,40 @@
 version: '3'
 
 services:
+    rabbitmq:
+        container_name: rabbitmq
+        hostname: rabbitmq
+        image: rabbitmq:3.12-management
+        ports:
+            - 15672:15672
+            - 5672:5672
+        networks:
+            - microservices_net
+    
+    stockservice:
+        container_name: stock_service
+        environment:
+            - EASYNETQ_CONNECTION_STRING=host=rabbitmq;port=5672;virtualHost=/;username=guest;password=guest
+        build:
+            context: .
+            dockerfile: projects/StockService/Dockerfile
+        networks:
+            - microservices_net
+        depends_on:
+            - rabbitmq
+    
+    shippingservice:
+        container_name: shipping_service
+        environment:
+            - EASYNETQ_CONNECTION_STRING=host=rabbitmq;port=5672;virtualHost=/;username=guest;password=guest
+        build:
+            context: .
+            dockerfile: projects/ShippingService/Dockerfile
+        networks:
+            - microservices_net 
+        depends_on:
+            - rabbitmq
+    
     orderservice:
         container_name: order_service
         environment:
@@ -10,6 +44,16 @@ services:
             dockerfile: projects/OrderService/Dockerfile
         networks:
             - microservices_net
+        depends_on:
+            - rabbitmq
+
+#    storeapi:
+#        container_name: store_api
+#        ports:
+#            - 5015:5015
+#        build:
+#            context: .
+#            dockerfile: projects/StoreAPI/Dockerfile
 
 networks:
     microservices_net:

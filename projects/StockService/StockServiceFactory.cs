@@ -8,16 +8,18 @@ namespace StockService;
 
 public static class StockServiceFactory
 {
-  public static StockService CreateStockService(string queueName)
+  public static StockService CreateStockService()
   {
     var easyNetQFactory = new EasyNetQFactory();
-    var messageClient = easyNetQFactory.CreatePubSubMessageClient<OrderRequestMessage>(queueName);
+    var messageClientStock = easyNetQFactory.CreateTopicMessageClient<OrderRequestMessage>("StockService", "processStockOrder");
+    var messageClientShipping = easyNetQFactory.CreateTopicMessageClient<OrderRequestMessage>("StockService", "processShippingOrder");
     
     var productRepository = new ProductRepository(new DataContext());
     var productService = new ProductService(productRepository);
     
     return new StockService(
-      messageClient,
+      messageClientStock,
+      messageClientShipping,
       productService
     );
   }
